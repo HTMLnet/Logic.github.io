@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Logic</title>
+</head>
+<body>
+  <h1>LC-share</h1>
+
+  <div>
+    <button id="create">Create Offer</button>
+    <textarea id="offer" placeholder="Offer"></textarea>
+    <button id="setAnswer">Set Answer</button>
+    <textarea id="answer" placeholder="Answer"></textarea>
+  </div>
+
+  <hr>
+
+  <input type="file" id="fileInput">
+  <button id="sendFile">Send File</button>
+  <a id="downloadLink"></a>
+
+  <pre id="log"></pre>
+
+<script>
+let pc = new RTCPeerConnection();
+let dataChannel = pc.createDataChannel("file");
+
+// Log helper
+function log(msg) {
+  document.getElementById("log").textContent += msg + "\n";
+}
+
+// Sending side
+dataChannel.onopen = () => log("Data channel open");
+dataChannel.onmessage = e => {
+  let blob = new Blob([e.data]);
+  let url = URL.createObjectURL(blob);
+  let link = document.getElementById("downloadLink");
+  link.href = url;
+  link.download = "received_file";
+  link.textContent = "Download received file";
+  log("File received");
+};
+
+// Offer/Answer handling
+document.getElementById("create").onclick = async () => {
+  let offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  document.getElementById("offer").value = JSON.stringify(pc.localDescription);
+};
+
+document.getElementById("setAnswer").onclick = async () => {
+  let answer = JSON.parse(document.getElementById("answer").value);
+  await pc.setRemoteDescription(answer);
+};
+
+// Answerer logic (paste offer, create answer)
+pc.ondatachannel = e => {
+  dataChannel = e.channel;
+  dataChannel.onmessage = evt => {
+    let blob = new Blob([evt.data]);
+    let url = URL.createObjectURL(blob);
+    let link = document.getElementById("downloadLink");
+    link.href = url;
+    link.download = "received_file";
+    link.textContent = "Download received file";
+    log("File received");
+  };
+};
+
+document.getElementById("sendFile").onclick = () => {
+  let file = document.getElementById("fileInput").files[0];
+  if (file) {
+    file.arrayBuffer().then(buf => {
+      dataChannel.send(buf);
+      log("File sent: " + file.name);
+    });
+  }
+};
+</script>
+</body>
+</html>
