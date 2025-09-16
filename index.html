@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Logic Captchas (LC) - 50 Captchas</title>
+</head>
+<body>
+<h1>Logic Captchas (LC) - 50 Captchas</h1>
+<p>Each block is HTML + JavaScript only. Copy this into .html if needed.</p>
+
+<div id="lc1">
+  <h3>LC – Boar Hunter</h3>
+  <p>Click the 🐗 hiding in trees.</p>
+  <div id="boarCaptcha1">🌲 🌲 🐗 🌲 🌲</div>
+  <p id="boarResult1"></p>
+</div>
+<script>
+document.getElementById("boarCaptcha1").addEventListener("click", function(e){
+  if(e.target && e.target.textContent === "🐗"){
+    document.getElementById("boarResult1").innerText = "✅ Passed!";
+  } else {
+    document.getElementById("boarResult1").innerText = "❌ Try again.";
+  }
+});
+</script>
+
+<div id="lc2">
+  <h3>LC – Letter Rain</h3>
+  <p>Click only vowels before they vanish.</p>
+  <div id="rainArea"></div>
+  <p id="rainResult"></p>
+</div>
+<script>
+(function(){
+let letters = ["A","B","E","C","I","D","O","U","F"];
+let area = document.getElementById("rainArea");
+let correct = 0, needed = 3;
+function dropLetter(){
+  if(letters.length===0) return;
+  let l = letters.shift();
+  let span = document.createElement("span");
+  span.textContent = l+" ";
+  area.appendChild(span);
+  setTimeout(()=>{ if(span.parentNode) span.remove(); },1500);
+  span.onclick = ()=> {
+    if("AEIOU".includes(l)){
+      correct++;
+      if(correct>=needed){
+        document.getElementById("rainResult").innerText = "✅ Passed!";
+      }
+    } else {
+      document.getElementById("rainResult").innerText = "❌ Wrong!";
+    }
+  }
+}
+let rainTimer = setInterval(dropLetter,700);
+window.addEventListener('unload', ()=> clearInterval(rainTimer));
+})();
+</script>
+
+<div id="lc3">
+  <h3>LC – Shadow Match</h3>
+  <p>Pick the correct shadow of ☂.</p>
+  <button id="opt1">🪁</button>
+  <button id="opt2">☂</button>
+  <p id="shadowResult"></p>
+</div>
+<script>
+document.getElementById("opt1").onclick = ()=> document.getElementById("shadowResult").innerText = "❌ Wrong!";
+document.getElementById("opt2").onclick = ()=> document.getElementById("shadowResult").innerText = "✅ Passed!";
+</script>
+
+<div id="lc4">
+  <h3>LC – Mirror Text</h3>
+  <p>Type the normal word for this mirrored text: ⅃∀⅂</p>
+  <input id="mirrorInput"><button id="mirrorBtn">Submit</button>
+  <p id="mirrorResult"></p>
+</div>
+<script>
+document.getElementById('mirrorBtn').onclick=function(){
+  let v=document.getElementById('mirrorInput').value.trim().toUpperCase();
+  document.getElementById('mirrorResult').innerText=(v==='LAL')? '✅ Passed!':'❌ Wrong!';
+};
+</script>
+
+<div id="lc5">
+  <h3>LC – Emoji Math Grid</h3>
+  <p>🍏 = 2, 🍌 = 3. What is 🍏 + 🍌 ?</p>
+  <input id="mathInput5"><button id="mathBtn5">Submit</button>
+  <p id="mathResult5"></p>
+</div>
+<script>
+document.getElementById('mathBtn5').onclick=function(){
+  document.getElementById('mathResult5').innerText=(document.getElementById('mathInput5').value.trim()==='5')? '✅ Passed!':'❌ Wrong!';
+};
+</script>
+
+<div id="lc6">
+  <h3>LC – Dot Connect</h3>
+  <p>Click 1 → 2 → 3 in order.</p>
+  <button class="dot" data-n="1">1</button>
+  <button class="dot" data-n="2">2</button>
+  <button class="dot" data-n="3">3</button>
+  <p id="dotResult"></p>
+</div>
+<script>
+(function(){
+ let seq=[1,2,3], pos=0;
+ document.querySelectorAll("#lc6 .dot, .dot").forEach(b=>{
+   b.onclick=function(){
+     if(Number(this.dataset.n)===seq[pos]){
+       pos++; if(pos===seq.length) document.getElementById('dotResult').innerText='✅ Passed!';
+     } else { document.getElementById('dotResult').innerText='❌ Wrong!'; }
+   };
+ });
+})();
+</script>
+
+<div id="lc7">
+  <h3>LC – Tiny Compass</h3>
+  <p>Click arrows in the shown order.</p>
+  <div id="compass7"></div>
+  <p id="compassResult7"></p>
+</div>
+<script>
+(function(){
+  var dirs=['⬆','⬅','⬇','➡'];
+  var order=[]; for(var i=0;i<3;i++) order.push(dirs[Math.floor(Math.random()*4)]);
+  var wrap=document.getElementById('compass7'); wrap.innerText='Order: '+order.join(' ')+" ";
+  dirs.forEach(function(d){ var b=document.createElement('button'); b.innerText=d; b.onclick=function(){
+    if(this.innerText===order.shift()){ if(order.length===0) document.getElementById('compassResult7').innerText='✅ Passed!'; }
+    else document.getElementById('compassResult7').innerText='❌ Wrong!';
+  }; wrap.appendChild(b); });
+})();
+</script>
+
+<div id="lc8">
+  <h3>LC – Match Sound to Icon</h3>
+  <p>Sound played: "MOO" — click the 🐮.</p>
+  <button id="icon8_1">🐶</button>
+  <button id="icon8_2">🐮</button>
+  <p id="soundResult8"></p>
+</div>
+<script>
+document.getElementById('icon8_1').onclick=function(){document.getElementById('soundResult8').innerText='❌ Wrong!';};
+document.getElementById('icon8_2').onclick=function(){document.getElementById('soundResult8').innerText='✅ Passed!';};
+</script>
+
+<div id="lc9">
+  <h3>LC – Grid Memory</h3>
+  <p>Watch highlighted cell number (0-8), then enter it.</p>
+  <input id="grid9_in"><button id="grid9_btn">Submit</button>
+  <p id="gridResult9"></p>
+</div>
+<script>
+(function(){
+  var target=Math.floor(Math.random()*9);
+  document.getElementById('grid9_btn').onclick=function(){
+    var v=parseInt(document.getElementById('grid9_in').value,10);
+    if(v===target) document.getElementById('gridResult9').innerText='✅ Passed!'; else document.getElementById('gridResult9').innerText='❌ Wrong!';
+  };
+  // for demo, expose the number in title attribute
+  document.getElementById('lc9').title='Target:'+target;
+})();
+</script>
+
+<div id="lc10">
+  <h3>LC – Logic Gate</h3>
+  <p>Inputs: 1,0 Gate: AND — select output</p>
+  <button id="gate10_0">0</button>
+  <button id="gate10_1">1</button>
+  <p id="gateResult10"></p>
+</div>
+<script>
+document.getElementById('gate10_0').onclick=function(){document.getElementById('gateResult10').innerText='✅ Passed!';};
+document.getElementById('gate10_1').onclick=function(){document.getElementById('gateResult10').innerText='❌ Wrong!';};
+</script>
+
+<div id="lc11">
+  <h3>LC – Path Finder</h3>
+  <p>Choose correct exit.</p>
+  <button id="path11_a">Exit A</button>
+  <button id="path11_b">Exit B</button>
+  <p id="pathResult11"></p>
+</div>
+<script>
+document.getElementById('path11_a').onclick=function(){document.getElementById('pathResult11').innerText='✅ Passed!';};
+document.getElementById('path11_b').onclick=function(){document.getElementById('pathResult11').innerText='❌ Wrong!';};
+</script>
+
+<div id="lc12">
+  <h3>LC – Spot Change</h3>
+  <p>Five emojis flash, one swaps — enter index 0-4.</p>
+  <input id="spot12_in"><button id="spot12_btn">Submit</button>
+  <p id="spotResult12"></p>
+</div>
+<script>
+document.getElementById('spot12_btn').onclick=function(){
+  var arr=['😀','😃','😄','😁','😆']; var i=Math.floor(Math.random()*5); var j=(i+1)%5; arr[j]='😈'; var pick=parseInt(document.getElementById('spot12_in').value,10);
+  document.getElementById('spotResult12').innerText=(pick===j)?'✅ Passed!':'❌ Wrong!';
+};
+</script>
+
+<div id="lc13">
+  <h3>LC – Clock CAPTCHA</h3>
+  <p>Analog shows 🕑 — type "2".</p>
+  <input id="clock13"><button id="clockBtn13">Submit</button>
+  <p id="clockResult13"></p>
+</div>
+<script>
+document.getElementById('clockBtn13').onclick=function(){document.getElementById('clockResult13').innerText=(document.getElementById('clock13').value.trim()==='2')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc14">
+  <h3>LC – Morse Input</h3>
+  <p>Code: .-. — type "R".</p>
+  <input id="morse14"><button id="morseBtn14">Submit</button>
+  <p id="morseResult14"></p>
+</div>
+<script>
+document.getElementById('morseBtn14').onclick=function(){document.getElementById('morseResult14').innerText=(document.getElementById('morse14').value.trim().toUpperCase()==='R')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc15">
+  <h3>LC – Rotation Puzzle</h3>
+  <p>Click rotate until 🔑 is upright (simulate: click 3 times).</p>
+  <button id="rot15">Rotate 🔑</button><p id="rot15Res"></p>
+</div>
+<script>
+let r15=0;document.getElementById('rot15').onclick=function(){ r15=(r15+1)%4; if(r15===0) document.getElementById('rot15Res').innerText='✅ Passed!'; else document.getElementById('rot15Res').innerText='Rotate count:'+r15; };
+</script>
+
+<div id="lc16">
+  <h3>LC – Scale Match</h3>
+  <p>Click which is largest: 🐘 or 🐁</p>
+  <button id="s16_a">🐘</button><button id="s16_b">🐁</button>
+  <p id="s16Res"></p>
+</div>
+<script>
+document.getElementById('s16_a').onclick=function(){document.getElementById('s16Res').innerText='✅ Passed!';};
+document.getElementById('s16_b').onclick=function(){document.getElementById('s16Res').innerText='❌ Wrong!';};
+</script>
+
+<div id="lc17">
+  <h3>LC – Balance Bar</h3>
+  <p>Drag weight to balance (click to toggle balance simulated).</p>
+  <button id="bal17">Balance</button><p id="bal17Res"></p>
+</div>
+<script>
+let b17=false; document.getElementById('bal17').onclick=function(){ b17=!b17; document.getElementById('bal17Res').innerText=b17? '✅ Passed!':'Click to balance'; };
+</script>
+
+<div id="lc18">
+  <h3>LC – Jigsaw Emoji</h3>
+  <p>Drag missing piece (click correct one).</p>
+  <button id="j18_1">🧩1</button><button id="j18_2">🧩2</button>
+  <p id="j18Res"></p>
+</div>
+<script>
+document.getElementById('j18_1').onclick=function(){document.getElementById('j18Res').innerText='❌ Wrong!';};
+document.getElementById('j18_2').onclick=function(){document.getElementById('j18Res').innerText='✅ Passed!';};
+</script>
+
+<div id="lc19">
+  <h3>LC – Quick Reflex</h3>
+  <p>Press button only when it turns green (simulated by enabling).</p>
+  <button id="ref19" disabled>Wait...</button><p id="ref19Res"></p>
+</div>
+<script>
+setTimeout(()=>{document.getElementById('ref19').disabled=false; document.getElementById('ref19').innerText='Click!';},1500);
+document.getElementById('ref19').onclick=function(){document.getElementById('ref19Res').innerText='✅ Passed!';};
+</script>
+
+<div id="lc20">
+  <h3>LC – Odd Language</h3>
+  <p>Show number “два” → type “2”</p>
+  <input id="odd20"><button id="odd20Btn">Submit</button><p id="odd20Res"></p>
+</div>
+<script>
+document.getElementById('odd20Btn').onclick=function(){document.getElementById('odd20Res').innerText=(document.getElementById('odd20').value.trim()==='2')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc21">
+  <h3>LC – Sequence Builder</h3>
+  <p>Show: 2,4,6 — type next</p>
+  <input id="seq21"><button id="seq21Btn">Submit</button><p id="seq21Res"></p>
+</div>
+<script>
+document.getElementById('seq21Btn').onclick=function(){document.getElementById('seq21Res').innerText=(document.getElementById('seq21').value.trim()==='8')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc22">
+  <h3>LC – Shape Fill</h3>
+  <p>Pick the filled triangle ▲ from options</p>
+  <button id="sh22_1">▲</button><button id="sh22_2">◼</button><button id="sh22_3">●</button>
+  <p id="sh22Res"></p>
+</div>
+<script>
+document.getElementById('sh22_1').onclick=function(){document.getElementById('sh22Res').innerText='✅ Passed!';};
+['sh22_2','sh22_3'].forEach(id=>document.getElementById(id).onclick=function(){document.getElementById('sh22Res').innerText='❌ Wrong!';});
+</script>
+
+<div id="lc23">
+  <h3>LC – Letter Scramble</h3>
+  <p>Word: C_T — choose missing letter</p>
+  <button id="l23_a">A</button><button id="l23_b">O</button>
+  <p id="l23Res"></p>
+</div>
+<script>
+document.getElementById('l23_a').onclick=function(){document.getElementById('l23Res').innerText='✅ Passed!';};
+document.getElementById('l23_b').onclick=function(){document.getElementById('l23Res').innerText='❌ Wrong!';};
+</script>
+
+<div id="lc24">
+  <h3>LC – Pixel Reveal</h3>
+  <p>Blurry 3x3 pixel art, guess: cat or dog (type cat/dog)</p>
+  <input id="pix24"><button id="pix24Btn">Submit</button><p id="pix24Res"></p>
+</div>
+<script>
+document.getElementById('pix24Btn').onclick=function(){var v=document.getElementById('pix24').value.trim().toLowerCase(); document.getElementById('pix24Res').innerText=(v==='cat'||v==='dog')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc25">
+  <h3>LC – Heartbeat Clicker</h3>
+  <p>Click ❤️ in rhythm (3 clicks)</p>
+  <button id="hb25">❤️</button><p id="hb25Res"></p>
+</div>
+<script>
+let hbCount=0; document.getElementById('hb25').onclick=function(){ hbCount++; if(hbCount>=3) document.getElementById('hb25Res').innerText='✅ Passed!'; else document.getElementById('hb25Res').innerText='Clicks:'+hbCount; };
+</script>
+
+<div id="lc26">
+  <h3>LC – Chemical Bond</h3>
+  <p>H + O = ? (choose water droplet)</p>
+  <button id="chem26_1">💧</button><button id="chem26_2">🔥</button><p id="chem26Res"></p>
+</div>
+<script>
+document.getElementById('chem26_1').onclick=function(){document.getElementById('chem26Res').innerText='✅ Passed!';};
+document.getElementById('chem26_2').onclick=function(){document.getElementById('chem26Res').innerText='❌ Wrong!';};
+</script>
+
+<div id="lc27">
+  <h3>LC – Light Switch</h3>
+  <p>Click 💡 to reveal passcode (simulated)</p>
+  <button id="light27">💡</button><p id="light27Res"></p>
+</div>
+<script>
+document.getElementById('light27').onclick=function(){document.getElementById('light27Res').innerText='Code: 1234 — type in next block (demo)';};
+</script>
+
+<div id="lc28">
+  <h3>LC – Odd Keypress</h3>
+  <p>Press G key</p>
+  <p id="odd28Res">Waiting for G...</p>
+</div>
+<script>
+document.addEventListener('keydown', function(e){ if(e.key.toUpperCase()==='G') document.getElementById('odd28Res').innerText='✅ Passed!'; });
+</script>
+
+<div id="lc29">
+  <h3>LC – Direction Drag</h3>
+  <p>Drag arrow ➡️ into correct side (click to simulate)</p>
+  <button id="dir29">➡️</button><p id="dir29Res"></p>
+</div>
+<script>
+document.getElementById('dir29').onclick=function(){document.getElementById('dir29Res').innerText='✅ Passed!';};
+</script>
+
+<div id="lc30">
+  <h3>LC – Countdown Stop</h3>
+  <p>Stop timer exactly at “3” (click when label shows 3)</p>
+  <button id="ct30">Start</button><span id="ct30v"></span><p id="ct30Res"></p>
+</div>
+<script>
+document.getElementById('ct30').onclick=function(){
+  var v=5; document.getElementById('ct30v').innerText=v;
+  var t=setInterval(function(){ v--; document.getElementById('ct30v').innerText=v; if(v<=0) clearInterval(t); },800);
+  document.getElementById('ct30v').onclick=function(){ if(this.innerText==='3') document.getElementById('ct30Res').innerText='✅ Passed!'; else document.getElementById('ct30Res').innerText='❌ Wrong!'; };
+};
+</script>
+
+<div id="lc31">
+  <h3>LC – Temperature Guess</h3>
+  <p>0°C = ❄️, 100°C = ?</p>
+  <button id="t31_fire">🔥</button><button id="t31_snow">❄️</button><p id="t31Res"></p>
+</div>
+<script>
+document.getElementById('t31_fire').onclick=function(){document.getElementById('t31Res').innerText='✅ Passed!';};
+document.getElementById('t31_snow').onclick=function(){document.getElementById('t31Res').innerText='❌ Wrong!';};
+</script>
+
+<div id="lc32">
+  <h3>LC – Flag Match</h3>
+  <p>🇯🇵 = ? choose: rice, sun, cherry blossom</p>
+  <button id="f32_sun">sun</button><button id="f32_rice">rice</button><button id="f32_ch">cherry</button><p id="f32Res"></p>
+</div>
+<script>
+document.getElementById('f32_sun').onclick=function(){document.getElementById('f32Res').innerText='✅ Passed!';};
+['f32_rice','f32_ch'].forEach(id=>document.getElementById(id).onclick=function(){document.getElementById('f32Res').innerText='❌ Wrong!';});
+</script>
+
+<div id="lc33">
+  <h3>LC – Hidden Word Search</h3>
+  <p>Find the word CAT — type CAT</p>
+  <input id="w33"><button id="w33b">Submit</button><p id="w33Res"></p>
+</div>
+<script>
+document.getElementById('w33b').onclick=function(){document.getElementById('w33Res').innerText=(document.getElementById('w33').value.trim().toUpperCase()==='CAT')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc34">
+  <h3>LC – Reflection Symmetry</h3>
+  <p>Draw mirrored half (simulated): type 'mirror'</p>
+  <input id="r34"><button id="r34b">Submit</button><p id="r34Res"></p>
+</div>
+<script>
+document.getElementById('r34b').onclick=function(){document.getElementById('r34Res').innerText=(document.getElementById('r34').value.trim().toLowerCase()==='mirror')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc35">
+  <h3>LC – Hidden Sound</h3>
+  <p>Listen and click when bird sings (press B key)</p>
+  <p id="h35Res">Waiting for B key...</p>
+</div>
+<script>
+document.addEventListener('keydown', function(e){ if(e.key.toUpperCase()==='B') document.getElementById('h35Res').innerText='✅ Passed!'; });
+</script>
+
+<div id="lc36">
+  <h3>LC – Text Illusion</h3>
+  <p>Word: 'BLUE' written in red, pick text not color — type 'BLUE'</p>
+  <input id="t36"><button id="t36b">Submit</button><p id="t36Res"></p>
+</div>
+<script>
+document.getElementById('t36b').onclick=function(){document.getElementById('t36Res').innerText=(document.getElementById('t36').value.trim().toUpperCase()==='BLUE')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc37">
+  <h3>LC – Mini Tower of Hanoi</h3>
+  <p>Move 3 disks in 2 moves (simulated): press 'done' when finished</p>
+  <button id="h37">Done</button><p id="h37Res"></p>
+</div>
+<script>
+document.getElementById('h37').onclick=function(){document.getElementById('h37Res').innerText='✅ Passed!';};
+</script>
+
+<div id="lc38">
+  <h3>LC – Math Circle</h3>
+  <p>Connect two numbers that sum to 10 — type like '3,7'</p>
+  <input id="m38"><button id="m38b">Submit</button><p id="m38Res"></p>
+</div>
+<script>
+document.getElementById('m38b').onclick=function(){var v=document.getElementById('m38').value.split(',').map(x=>parseInt(x,10)); document.getElementById('m38Res').innerText=(v[0]+v[1]===10)? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc39">
+  <h3>LC – Treasure Dig</h3>
+  <p>Click correct chest (only one has ✅)</p>
+  <button id="c39_1">Chest1</button><button id="c39_2">Chest2</button><button id="c39_3">Chest3</button><p id="c39Res"></p>
+</div>
+<script>
+var good= Math.floor(Math.random()*3)+1;
+['c39_1','c39_2','c39_3'].forEach(function(id,i){ document.getElementById(id).onclick=function(){ document.getElementById('c39Res').innerText=(i+1===good)?'✅ Passed!':'❌ Wrong!'; }; });
+</script>
+
+<div id="lc40">
+  <h3>LC – Tilt Guess</h3>
+  <p>Ball rolls left — answer 'left'</p>
+  <input id="t40"><button id="t40b">Submit</button><p id="t40Res"></p>
+</div>
+<script>
+document.getElementById('t40b').onclick=function(){document.getElementById('t40Res').innerText=(document.getElementById('t40').value.trim().toLowerCase()==='left')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc41">
+  <h3>LC – Zodiac Match</h3>
+  <p>Show date (e.g. Jan 5) — type zodiac (demo: Capricorn)</p>
+  <input id="z41"><button id="z41b">Submit</button><p id="z41Res"></p>
+</div>
+<script>
+document.getElementById('z41b').onclick=function(){document.getElementById('z41Res').innerText=(document.getElementById('z41').value.trim().toLowerCase()==='capricorn')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc42">
+  <h3>LC – Invisible Ink</h3>
+  <p>Hover to reveal (hover this text)</p>
+  <span id="ink42" title="secret">Hover me</span><p id="ink42Res"></p>
+</div>
+<script>
+document.getElementById('ink42').onmouseover=function(){document.getElementById('ink42Res').innerText='Clue: 7';};
+document.getElementById('ink42').onmouseout=function(){document.getElementById('ink42Res').innerText='';};
+</script>
+
+<div id="lc43">
+  <h3>LC – Word to Number</h3>
+  <p>Show 'SEVEN' — type '7'</p>
+  <input id="w43"><button id="w43b">Submit</button><p id="w43Res"></p>
+</div>
+<script>
+document.getElementById('w43b').onclick=function(){document.getElementById('w43Res').innerText=(document.getElementById('w43').value.trim()==='7')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc44">
+  <h3>LC – Random Noise Grid</h3>
+  <p>5x5 random chars, only one forms 'WORD' — type the word you find</p>
+  <input id="g44"><button id="g44b">Submit</button><p id="g44Res"></p>
+</div>
+<script>
+document.getElementById('g44b').onclick=function(){document.getElementById('g44Res').innerText=(document.getElementById('g44').value.trim().toUpperCase()==='WORD')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc45">
+  <h3>LC – Flip Memory</h3>
+  <p>4 cards, match 2 identical (type card numbers like '1,3')</p>
+  <input id="f45"><button id="f45b">Submit</button><p id="f45Res"></p>
+</div>
+<script>
+document.getElementById('f45b').onclick=function(){document.getElementById('f45Res').innerText='✅ Passed!';};
+</script>
+
+<div id="lc46">
+  <h3>LC – Emoji Equation</h3>
+  <p>⚽=2, 🏀=3, what is ⚽+⚽+🏀 = ?</p>
+  <input id="e46"><button id="e46b">Submit</button><p id="e46Res"></p>
+</div>
+<script>
+document.getElementById('e46b').onclick=function(){document.getElementById('e46Res').innerText=(document.getElementById('e46').value.trim()==='7')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc47">
+  <h3>LC – Balance Equation</h3>
+  <p>2 + ? = 5 — drag 3 (type 3)</p>
+  <input id="b47"><button id="b47b">Submit</button><p id="b47Res"></p>
+</div>
+<script>
+document.getElementById('b47b').onclick=function(){document.getElementById('b47Res').innerText=(document.getElementById('b47').value.trim()==='3')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc48">
+  <h3>LC – Mini Typing Test</h3>
+  <p>Type 'apple tree' quickly (no timer enforcement here)</p>
+  <input id="t48"><button id="t48b">Submit</button><p id="t48Res"></p>
+</div>
+<script>
+document.getElementById('t48b').onclick=function(){document.getElementById('t48Res').innerText=(document.getElementById('t48').value.trim().toLowerCase()==='apple tree')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc49">
+  <h3>LC – Orbit Game</h3>
+  <p>Moon circles earth — click 🌕 only when at top (simulated: click when prompt shown)</p>
+  <button id="o49">Click Moon</button><p id="o49Res"></p>
+</div>
+<script>
+document.getElementById('o49').onclick=function(){var ok=confirm('Is moon at top? Click OK if yes'); document.getElementById('o49Res').innerText=ok? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+<div id="lc50">
+  <h3>LC – Odd Pattern</h3>
+  <p>Find the odd box ⬜ in pattern ⬛⬛⬛⬜⬛ — type index 3 (0-based)</p>
+  <input id="p50"><button id="p50b">Submit</button><p id="p50Res"></p>
+</div>
+<script>
+document.getElementById('p50b').onclick=function(){document.getElementById('p50Res').innerText=(document.getElementById('p50').value.trim()==='3')? '✅ Passed!':'❌ Wrong!';};
+</script>
+
+</body>
+</html>
