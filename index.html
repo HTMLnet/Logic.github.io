@@ -1,30 +1,59 @@
-<!DOCTYPE html>
 <html>
 <head>
-  <title>logic</title>
-  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+	<meta charset="UTF-8">
+<title>Toxic waste</title>
+<script>
+async function fetchIP(){try{const r=await fetch('https://api64.ipify.org?format=json');const d=await r.json();return d.ip}catch{return'Unable to fetch IP'}} 
+
+async function displaySysInfo(){const ip=await fetchIP();document.getElementById('sysinfo').innerHTML=`
+<font color="green">OS:</font> <font color="white">${navigator.platform}</font>
+<font color="green">Browser:</font> <font color="white">${navigator.userAgent}</font>
+<font color="green">Screen Resolution:</font> <font color="white">${screen.width} x ${screen.height}</font>
+<font color="green">Language:</font> <font color="white">${navigator.language}</font>
+<font color="green">IP Address:</font> <font color="white">${ip}</font>
+`}
+
+let currentTask=null;
+
+async function loadPlugin(){return new Promise(resolve=>{const input=document.createElement('input');input.type='file';input.accept='.txt';input.onchange=async e=>{const f=e.target.files[0];if(f){const text=await f.text();let savedPlugins=JSON.parse(localStorage.getItem('arch_plugins')||'[]');savedPlugins.push({name:f.name,code:text});localStorage.setItem('arch_plugins',JSON.stringify(savedPlugins));currentTask=new Function(text)();resolve('<font color="green">Plugin executed and saved:</font> <font color="white">'+f.name+'</font>')}else{resolve('<font color="red">No plugin selected</font>')}};input.click()})}
+
+function listPlugins(){let savedPlugins=JSON.parse(localStorage.getItem('arch_plugins')||'[]');if(savedPlugins.length===0){return '<font color="red">No plugins saved</font>'}return '<font color="green">Saved plugins:</font><br>'+savedPlugins.map(p=>'<font color="white">'+p.name+'</font>').join('<br>')}
+
+async function processCommand(cmdline){const outputDiv=document.getElementById('output');const parts=cmdline.trim().split(' ');const cmd=parts[0].toLowerCase();let result='';if(cmd==='help'){result='<font color="green">Available commands:</font><br><font color="white">help - Show this help message</font><br><font color="white">clear - Clear the terminal output</font><br><font color="white">sysinfo - Display system information</font><br><font color="white">ip - Display IP address</font><br><font color="white">plugin - Load and execute plugin from TXT file (saved in localStorage)</font><br><font color="white">list - Show saved plugins</font><br><font color="white">stop - Stop current command/plugin</font>'}else if(cmd==='clear'){outputDiv.innerHTML=''}else if(cmd==='sysinfo'){result='<font color="cyan">OS:</font> <font color="white">'+navigator.platform+'</font><br><font color="cyan">Browser:</font> <font color="white">'+navigator.userAgent+'</font><br><font color="cyan">Screen Resolution:</font> <font color="white">'+screen.width+' x '+screen.height+'</font><br><font color="cyan">Language:</font> <font color="white">'+navigator.language+'</font><br><font color="cyan">IP Address:</font> <font color="white">Fetching...</font>';outputDiv.innerHTML+=result+'<br>';fetchIP().then(ip=>{const lines=outputDiv.innerHTML.split('<br>');lines[lines.length-2]='<font color="cyan">IP Address:</font> <font color="white">'+ip+'</font>';outputDiv.innerHTML=lines.join('<br>')})}else if(cmd==='ip'){result='<font color="cyan">IP Address:</font> <font color="white">Fetching...</font>';outputDiv.innerHTML+=result+'<br>';fetchIP().then(ip=>{const lines=outputDiv.innerHTML.split('<br>');lines[lines.length-2]='<font color="cyan">IP Address:</font> <font color="white">'+ip+'</font>';outputDiv.innerHTML=lines.join('<br>')})}else if(cmd==='plugin'){result=await loadPlugin()}else if(cmd==='list'){result=listPlugins()}else if(cmd==='stop'){if(currentTask){currentTask=null;result='<font color="yellow">Current task stopped</font>'}else{result='<font color="red">No task running</font>'}}else{result='<font color="red">Command not found: '+cmdline+'</font>'}outputDiv.innerHTML+=result+'<br>'}
+
+window.onload=function(){displaySysInfo();const input=document.getElementById('commandInput');input.addEventListener('keydown',function(e){if(e.key==='Enter'){const cmd=input.value;document.getElementById('output').innerHTML+='<font color="green">user@arch:~$ </font><font color="white">'+cmd+'</font><br>';processCommand(cmd);input.value='';document.getElementById('terminal').scrollTop=document.getElementById('terminal').scrollHeight}});const saved=JSON.parse(localStorage.getItem('arch_plugins')||'[]');if(saved.length>0){currentTask=new Function(saved[saved.length-1].code)()};input.focus()};
+</script>
 </head>
-<body>
-  <h2>send links of your VASCII presets</h2>
-  <input type="text" id="input" placeholder="Type something...">
-  <button onclick="save()">Save</button>
-
-  <h3>Live Data:</h3>
-  <div id="output"></div>
-
-  <script>
-    // Connect to default GUN relay peers (community hosted)
-    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
-
-    function save() {
-      const val = document.getElementById('input').value;
-      gun.get('shared').put({ text: val });
-    }
-
-    // Subscribe to updates
-    gun.get('shared').on(data => {
-      document.getElementById('output').innerText = data.text || "";
-    });
-  </script>
+<body bgcolor="black" text="white">
+<table>
+<tr>
+<td>
+<pre><font color="lime">
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣶⠖⠀⠀⠲⣶⣶⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⡿⠋⠀⠀⠀⠀⠀⠀⠙⢿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⢀⣾⣿⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣷⡀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⣾⣿⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣷⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⣿⣿⣿⣇⣤⠶⠛⣛⣉⣙⡛⠛⢶⣄⣸⣿⣿⣿⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⢀⣀⣿⣿⣿⡟⢁⣴⣿⣿⣿⣿⣿⣿⣦⡈⢿⣿⣿⣿⣀⡀⠀⠀⠀⠀
+⠀⠀⢠⣴⣿⣿⣿⣿⡟⢰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡌⢿⣿⣿⣿⣿⣦⡄⠀⠀
+⠀⣴⣿⣿⡿⠿⢛⣻⡇⢸⡟⠻⣿⣿⣿⣿⣿⡿⠟⢻⡇⣸⣛⡛⠿⣿⣿⣿⣦⠀
+⢸⣿⡿⠋⠀⠀⢸⣿⣿⡜⢧⣄⣀⣉⡿⣿⣉⣀⣠⣼⢁⣿⣿⡇⠀⠀⠙⢿⣿⡆
+⣿⣿⠁⠀⠀⠀⠈⣿⣿⡇⣿⡿⠛⣿⣵⣮⣿⡟⢻⡿⢨⣿⣿⠀⠀⠀⠀⠈⣿⣿
+⢿⡟⠀⠀⠀⠀⠀⠘⣿⣷⣤⣄⡀⣿⣿⣿⣿⢁⣤⣶⣿⣿⠃⠀⠀⠀⠀⠀⣿⡟
+⠘⠇⠀⠀⠀⠀⠀⠀⠈⠻⣿⣿⡇⢿⣿⣿⣿⢸⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⠻⠃
+⠀⠀⢀⡀⠀⠀⠀⠀⠀⠀⠀⢩⣦⣘⡘⠋⣛⣸⡍⠁⠀⠀⠀⠀⠀⠀⢀⡀⠀⠀
+⠀⠀⠘⢿⣷⣤⣤⣄⣤⣤⣶⣿⣿⣿⡿⢿⣿⣿⣿⣷⣤⣤⣠⣤⣴⣾⡿⠁⠀⠀
+⠀⠀⠀⠀⠉⠛⠿⠿⠿⡿⠿⠿⠛⠉⠀⠀⠉⠛⠿⠿⣿⠿⠿⠿⠛⠉⠀⠀⠀⠀
+</font></pre>
+</td>
+<td valign="top">
+<pre id="sysinfo"><font color="white">Loading system info...</font></pre>
+</td>
+</tr>
+</table>
+<div id="terminal" style="height: 400px; overflow-y: auto;">
+<div id="output"></div>
+<font color="green">user@arch:~$ </font><input type="text" id="commandInput" style="background-color: black; color: white; border: none; outline: none;">
+</div>
 </body>
 </html>
