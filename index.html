@@ -31,10 +31,54 @@ else{result='<font color="red">Command not found: '+cmdline+'</font>'}
 outputDiv.innerHTML+=result+'<br>'
 }
 
-window.onload=function(){displaySysInfo();const input=document.getElementById('commandInput');input.addEventListener('keydown',function(e){if(e.key==='Enter'){const cmd=input.value;document.getElementById('output').innerHTML+='<font color="green">user@arch:~$ </font><font color="white">'+cmd+'</font><br>';processCommand(cmd);input.value='';document.getElementById('terminal').scrollTop=document.getElementById('terminal').scrollHeight}});const saved=JSON.parse(localStorage.getItem('arch_plugins')||'[]');if(saved.length>0){currentTask=new Function(saved[saved.length-1].code)()};input.focus()};
+window.onload=function(){
+displaySysInfo();
+const input=document.getElementById('commandInput');
+input.addEventListener('keydown',function(e){
+if(e.key==='Enter'){
+const cmd=input.value;
+document.getElementById('output').innerHTML+='<font color="green">user@arch:~$ </font><font color="white">'+cmd+'</font><br>';
+processCommand(cmd);
+input.value='';
+document.getElementById('terminal').scrollTop=document.getElementById('terminal').scrollHeight
+}});
+input.focus()
+};
 </script>
 </head>
 <body bgcolor="black" text="white">
+<table>
+<tr>
+<td>
+<pre><font color="lime">
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣶⠖⠀⠀⠲⣶⣶⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⡿⠋⠀⠀⠀⠀⠀⠀⠙⢿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⢀⣾⣿⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣷⡀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⣾⣿⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣷⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⣿⣿⣿⣇⣤⠶⠛⣛⣉⣙⡛⠛⢶⣄⣸⣿⣿⣿⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⢀⣀⣿⣿⣿⡟⢁⣴⣿⣿⣿⣿⣿⣿⣦⡈⢿⣿⣿⣿⣀⡀⠀⠀⠀⠀
+⠀⠀⢠⣴⣿⣿⣿⣿⡟⢰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡌⢿⣿⣿⣿⣿⣦⡄⠀⠀
+⠀⣴⣿⣿⡿⠿⢛⣻⡇⢸⡟⠻⣿⣿⣿⣿⣿⡿⠟⢻⡇⣸⣛⡛⠿⣿⣿⣿⣦⠀
+⢸⣿⡿⠋⠀⠀⢸⣿⣿⡜⢧⣄⣀⣉⡿⣿⣉⣀⣠⣼⢁⣿⣿⡇⠀⠀⠙⢿⣿⡆
+⣿⣿⠁⠀⠀⠀⠈⣿⣿⡇⣿⡿⠛⣿⣵⣮⣿⡟⢻⡿⢨⣿⣿⠀⠀⠀⠀⠈⣿⣿
+⢿⡟⠀⠀⠀⠀⠀⠘⣿⣷⣤⣄⡀⣿⣿⣿⣿⢁⣤⣶⣿⣿⠃⠀⠀⠀⠀⠀⣿⡟
+⠘⠇⠀⠀⠀⠀⠀⠀⠈⠻⣿⣿⡇⢿⣿⣿⣿⢸⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⠻⠃
+⠀⠀⢀⡀⠀⠀⠀⠀⠀⠀⠀⢩⣦⣘⡘⠋⣛⣸⡍⠁⠀⠀⠀⠀⠀⠀⢀⡀⠀⠀
+⠀⠀⠘⢿⣷⣤⣤⣄⣤⣤⣶⣿⣿⣿⡿⢿⣿⣿⣿⣷⣤⣤⣠⣤⣴⣾⡿⠁⠀⠀
+⠀⠀⠀⠀⠉⠛⠿⠿⠿⡿⠿⠿⠛⠉⠀⠀⠉⠛⠿⠿⣿⠿⠿⠿⠛⠉⠀⠀⠀⠀
+</font></pre>
+</td>
+<td valign="top">
+<pre id="sysinfo"><font color="white">Loading system info...</font></pre>
+</td>
+</tr>
+</table>
+<div id="terminal" style="height: 400px; overflow-y: auto;">
+<div id="output"></div>
+<font color="green">user@arch:~$ </font><input type="text" id="commandInput" style="background-color: black; color: white; border: none; outline: none;">
+</div>
+</body>
+</html><body bgcolor="black" text="white">
 <table>
 <tr>
 <td>
