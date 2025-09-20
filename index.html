@@ -1,48 +1,207 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Toxic waste</title>
+<title>Toxic Waste Terminal</title>
 <script>
-async function fetchIP(){try{const r=await fetch('https://api64.ipify.org?format=json');const d=await r.json();return d.ip}catch{return'Unable to fetch IP'}} 
-async function displaySysInfo(){const ip=await fetchIP();document.getElementById('sysinfo').innerHTML=`
-<font color="green">OS:</font> <font color="white">${navigator.platform}</font>
-<font color="green">Browser:</font> <font color="white">${navigator.userAgent}</font>
-<font color="green">Screen Resolution:</font> <font color="white">${screen.width} x ${screen.height}</font>
-<font color="green">Language:</font> <font color="white">${navigator.language}</font>
-<font color="green">IP Address:</font> <font color="white">${ip}</font>
-`}
+let currentTask = null;
+let stopFlag = false;
+let commandHistory = [];
+let historyIndex = -1;
+let currentDir = '/home/user';
+const fileSystem = {
+    '/home/user': {
+        'readme.txt': 'Welcome to Toxic Waste Terminal!',
+        'docs': {}
+    }
+};
 
-let currentTask=null;
-function listPlugins(){let savedPlugins=JSON.parse(localStorage.getItem('arch_plugins')||'[]');if(savedPlugins.length===0){return '<font color="red">No plugins saved</font>'}return '<font color="green">Saved plugins:</font><br>'+savedPlugins.map(p=>'<font color="white">'+p.name+'</font>').join('<br>')}
-
-async function processCommand(cmdline){
-const outputDiv=document.getElementById('output');
-const parts=cmdline.trim().split(' ');
-const cmd=parts[0].toLowerCase();
-let result='';
-if(cmd==='help'){result='<font color="green">Available commands:</font><br><font color="white">help - Show this help message</font><br><font color="white">clear - Clear the terminal output</font><br><font color="white">sysinfo - Display system information</font><br><font color="white">ip - Display IP address</font><br><font color="white">plug &lt;JavaScript code&gt; - Execute JS code directly (saved in localStorage)</font><br><font color="white">list - Show saved plugins</font><br><font color="white">stop - Stop current command/plugin</font>'} 
-else if(cmd==='clear'){outputDiv.innerHTML=''} 
-else if(cmd==='sysinfo'){result='<font color="cyan">OS:</font> <font color="white">'+navigator.platform+'</font><br><font color="cyan">Browser:</font> <font color="white">'+navigator.userAgent+'</font><br><font color="cyan">Screen Resolution:</font> <font color="white">'+screen.width+' x '+screen.height+'</font><br><font color="cyan">Language:</font> <font color="white">'+navigator.language+'</font><br><font color="cyan">IP Address:</font> <font color="white">Fetching...</font>';outputDiv.innerHTML+=result+'<br>';fetchIP().then(ip=>{const lines=outputDiv.innerHTML.split('<br>');lines[lines.length-2]='<font color="cyan">IP Address:</font> <font color="white">'+ip+'</font>';outputDiv.innerHTML=lines.join('<br>')})} 
-else if(cmd==='ip'){result='<font color="cyan">IP Address:</font> <font color="white">Fetching...</font>';outputDiv.innerHTML+=result+'<br>';fetchIP().then(ip=>{const lines=outputDiv.innerHTML.split('<br>');lines[lines.length-2]='<font color="cyan">IP Address:</font> <font color="white">'+ip+'</font>';outputDiv.innerHTML=lines.join('<br>')})} 
-else if(cmd==='plug' && parts.length>1){const code=cmdline.slice(5);let savedPlugins=JSON.parse(localStorage.getItem('arch_plugins')||'[]');savedPlugins.push({name:'direct_plugin',code:code});localStorage.setItem('arch_plugins',JSON.stringify(savedPlugins));currentTask=new Function(code)();result='<font color="green">Plugin executed and saved.</font>'} 
-else if(cmd==='list'){result=listPlugins()} 
-else if(cmd==='stop'){if(currentTask){currentTask=null;result='<font color="yellow">Current task stopped</font>'}else{result='<font color="red">No task running</font>'}} 
-else{result='<font color="red">Command not found: '+cmdline+'</font>'}
-outputDiv.innerHTML+=result+'<br>'
+function ls(dir = currentDir) {
+    const dirContent = fileSystem[dir] || {};
+    return Object.keys(dirContent).map(item => 
+        typeof dirContent[item] === 'object' ? `<font color="cyan">${item}/</font>` : item
+    ).join(' ');
 }
 
-window.onload=function(){
-displaySysInfo();
-const input=document.getElementById('commandInput');
-input.addEventListener('keydown',function(e){
-if(e.key==='Enter'){
-const cmd=input.value;
-document.getElementById('output').innerHTML+='<font color="green">user@arch:~$ </font><font color="white">'+cmd+'</font><br>';
-processCommand(cmd);
-input.value='';
-document.getElementById('terminal').scrollTop=document.getElementById('terminal').scrollHeight
-}});
-input.focus()
+function cd(path) {
+    if (!path) return currentDir;
+    const newPath = path.startsWith('/') ? path : `${currentDir}/${path}`.replace(/\/+/g, '/');
+    if (fileSystem[newPath]) {
+        currentDir = newPath;
+        return '';
+    }
+    return `<font color="red">cd: ${path}: No such directory</font>`;
+}
+
+function cat(file) {
+    const filePath = file.startsWith('/') ? file : `${currentDir}/${file}`;
+    const dir = filePath.substring(0, filePath.lastIndexOf('/'));
+    const fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+    if (fileSystem[dir] && typeof fileSystem[dir][fileName] === 'string') {
+        return `<font color="white">${fileSystem[dir][fileName]}</font>`;
+    }
+    return `<font color="red">cat: ${file}: No such file</font>`;
+}
+
+async function fetchIP() {
+    try {
+        const r = await fetch('https://api64.ipify.org?format=json');
+        const d = await r.json();
+        return d.ip;
+    } catch {
+        return 'Unable to fetch IP';
+    }
+}
+
+async function displaySysInfo() {
+    const ip = await fetchIP();
+    document.getElementById('sysinfo').innerHTML = `
+<font size="2" color="green">OS:</font> <font size="2" color="white">${navigator.platform}</font><br>
+<font size="2" color="green">Browser:</font> <font size="2" color="white">${navigator.userAgent}</font><br>
+<font size="2" color="green">Screen Resolution:</font> <font size="2" color="white">${screen.width} x ${screen.height}</font><br>
+<font size="2" color="green">Language:</font> <font size="2" color="white">${navigator.language}</font><br>
+<font size="2" color="green">IP Address:</font> <font size="2" color="white">${ip}</font>`;
+}
+
+function getCommandSuggestions(partial) {
+    const commands = ['help', 'clear', 'sysinfo', 'ip', 'plugin', 'stop', 'ls', 'cd', 'cat', 'pwd', 'whoami', 'date'];
+    return commands.filter(cmd => cmd.startsWith(partial));
+}
+
+function getFileSuggestions(partial) {
+    const dirContent = fileSystem[currentDir] || {};
+    return Object.keys(dirContent).filter(item => item.startsWith(partial));
+}
+
+async function processCommand(cmdline) {
+    const outputDiv = document.getElementById('output');
+    const parts = cmdline.trim().split(' ').filter(p => p);
+    const cmd = parts[0]?.toLowerCase() || '';
+    let result = '';
+
+    if (cmdline.trim()) {
+        commandHistory.unshift(cmdline);
+        if (commandHistory.length > 50) commandHistory.pop();
+        historyIndex = -1;
+    }
+
+    if (cmd === 'help') {
+        result = `<font size="2" color="green">Available commands:</font><br>
+<font size="2" color="white">help - Show this help message</font><br>
+<font size="2" color="white">clear - Clear the terminal output</font><br>
+<font size="2" color="white">sysinfo - Display system information</font><br>
+<font size="2" color="white">ip - Display IP address</font><br>
+<font size="2" color="white">plugin [code] - Execute inline JavaScript code</font><br>
+<font size="2" color="white">stop - Stop current plugin</font><br>
+<font size="2" color="white">ls - List directory contents</font><br>
+<font size="2" color="white">cd [dir] - Change directory</font><br>
+<font size="2" color="white">cat [file] - Display file contents</font><br>
+<font size="2" color="white">pwd - Print working directory</font><br>
+<font size="2" color="white">whoami - Display current user</font><br>
+<font size="2" color="white">date - Display current date and time</font>`;
+    } else if (cmd === 'clear') {
+        outputDiv.innerHTML = '';
+    } else if (cmd === 'sysinfo') {
+        result = `<font size="2" color="cyan">OS:</font> <font size="2" color="white">${navigator.platform}</font><br>
+<font size="2" color="cyan">Browser:</font> <font size="2" color="white">${navigator.userAgent}</font><br>
+<font size="2" color="cyan">Screen Resolution:</font> <font size="2" color="white">${screen.width} x ${screen.height}</font><br>
+<font size="2" color="cyan">Language:</font> <font size="2" color="white">${navigator.language}</font><br>
+<font size="2" color="cyan">IP Address:</font> <font size="2" color="white">Fetching...</font>`;
+        outputDiv.innerHTML += result + '<br>';
+        fetchIP().then(ip => {
+            const lines = outputDiv.innerHTML.split('<br>');
+            lines[lines.length-2] = `<font size="2" color="cyan">IP Address:</font> <font size="2" color="white">${ip}</font>`;
+            outputDiv.innerHTML = lines.join('<br>');
+        });
+    } else if (cmd === 'ip') {
+        result = `<font size="2" color="cyan">IP Address:</font> <font size="2" color="white">Fetching...</font>`;
+        outputDiv.innerHTML += result + '<br>';
+        fetchIP().then(ip => {
+            const lines = outputDiv.innerHTML.split('<br>');
+            lines[lines.length-2] = `<font size="2" color="cyan">IP Address:</font> <font size="2" color="white">${ip}</font>`;
+            outputDiv.innerHTML = lines.join('<br>');
+        });
+    } else if (cmd === 'plugin') {
+        const code = cmdline.trim().substring('plugin'.length).trim();
+        if (code) {
+            stopFlag = false;
+            currentTask = (async () => {
+                try { await eval(`(async()=>{${code}})()`); } 
+                catch(e) { 
+                    outputDiv.innerHTML += `<font size="2" color="red">Plugin error: ${e.message}</font><br>`;
+                }
+            })();
+            result = `<font size="2" color="green">Executing inline plugin code</font>`;
+        } else {
+            result = '<font size="2" color="red">No code provided</font>';
+        }
+    } else if (cmd === 'stop') {
+        if (currentTask) {
+            stopFlag = true;
+            currentTask = null;
+            result = '<font size="2" color="yellow">Current plugin stopped</font>';
+        } else {
+            result = '<font size="2" color="red">No plugin running</font>';
+        }
+    } else if (cmd === 'ls') {
+        result = ls();
+    } else if (cmd === 'cd') {
+        result = cd(parts[1]);
+    } else if (cmd === 'cat') {
+        result = cat(parts[1]);
+    } else if (cmd === 'pwd') {
+        result = `<font size="2" color="white">${currentDir}</font>`;
+    } else if (cmd === 'whoami') {
+        result = '<font size="2" color="white">user</font>';
+    } else if (cmd === 'date') {
+        result = `<font size="2" color="white">${new Date().toLocaleString()}</font>`;
+    } else {
+        result = `<font size="2" color="red">Command not found: ${cmd}</font>`;
+    }
+
+    outputDiv.innerHTML += result + '<br>';
+}
+
+window.onload = function() {
+    displaySysInfo();
+    const input = document.getElementById('commandInput');
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const cmd = input.value;
+            document.getElementById('output').innerHTML += `<font size="2" color="green">user@arch:${currentDir}$ </font><font size="2" color="white">${cmd}</font><br>`;
+            processCommand(cmd);
+            input.value = '';
+            document.getElementById('terminal').scrollTop = document.getElementById('terminal').scrollHeight;
+        } else if (e.key === 'ArrowUp') {
+            if (historyIndex + 1 < commandHistory.length) {
+                historyIndex++;
+                input.value = commandHistory[historyIndex];
+            }
+        } else if (e.key === 'ArrowDown') {
+            if (historyIndex > -1) {
+                historyIndex--;
+                input.value = historyIndex === -1 ? '' : commandHistory[historyIndex];
+            }
+        } else if (e.key === 'Tab') {
+            e.preventDefault();
+            const value = input.value;
+            const parts = value.trim().split(' ');
+            let suggestions = [];
+            if (parts.length === 1) {
+                suggestions = getCommandSuggestions(parts[0]);
+            } else if (['cd', 'cat'].includes(parts[0].toLowerCase())) {
+                suggestions = getFileSuggestions(parts[parts.length-1]);
+            }
+            if (suggestions.length === 1) {
+                if (parts.length === 1) {
+                    input.value = suggestions[0];
+                } else {
+                    parts[parts.length-1] = suggestions[0];
+                    input.value = parts.join(' ');
+                }
+            }
+        }
+    });
+    input.focus();
 };
 </script>
 </head>
@@ -50,7 +209,7 @@ input.focus()
 <table>
 <tr>
 <td>
-<pre><font color="lime">
+<pre><font size="2" color="lime">
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣶⠖⠀⠀⠲⣶⣶⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⡿⠋⠀⠀⠀⠀⠀⠀⠙⢿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⢀⣾⣿⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣷⡀⠀⠀⠀⠀⠀⠀
@@ -69,13 +228,14 @@ input.focus()
 </font></pre>
 </td>
 <td valign="top">
-<pre id="sysinfo"><font color="white">Loading system info...</font></pre>
+<pre id="sysinfo"><font size="2" color="white">Loading system info...</font></pre>
 </td>
 </tr>
 </table>
 <div id="terminal" style="height: 400px; overflow-y: auto;">
 <div id="output"></div>
-<font color="green">user@arch:~$ </font><input type="text" id="commandInput" style="background-color: black; color: white; border: none; outline: none;">
+<font size="2" color="green">user@arch:/home/user$ </font>
+<input type="text" id="commandInput" style="background-color: black; color: white; border: none; outline: none; font-size: 12px;">
 </div>
 </body>
 </html>
